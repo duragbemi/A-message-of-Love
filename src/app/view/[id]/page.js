@@ -106,7 +106,7 @@ export default function ViewLetter({ params }) {
                 <img src={data.media_url} alt="Memory" className="w-full h-full object-cover" />
               )}
             </div>
-          ) : <div className="h-20 bg-gradient-to-b from-red-900 to-transparent"></div>}
+          ) : <div className="h-20 bg-linear-to-b from-red-900 to-transparent"></div>}
 
           <div className="p-8 md:p-12 relative pb-24">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
