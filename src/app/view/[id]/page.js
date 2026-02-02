@@ -2,11 +2,16 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+// NEW: Import useParams to fix the "Letter not found" error on mobile/production
+import { useParams } from 'next/navigation'; 
 import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
-import { Volume2, Heart, MessageCircle } from 'lucide-react';
+import { Volume2, Heart } from 'lucide-react';
 
-export default function ViewLetter({ params }) {
+export default function ViewLetter() {
+  // NEW: Get ID safely using the hook
+  const params = useParams(); 
+  
   const [data, setData] = useState(null);
   const [isOpened, setIsOpened] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -15,15 +20,18 @@ export default function ViewLetter({ params }) {
   const audioRef = useRef(null);
 
   useEffect(() => {
+    // Wait for params to be ready
+    if (!params?.id) return;
+
     const fetchData = async () => {
-      // Fetch the letter
+      // Fetch the letter using the ID from the hook
       const { data: capsule, error } = await supabase.from('capsules').select('*').eq('id', params.id).single();
       if (error) console.error("Error fetching:", error);
       setData(capsule);
       setLoading(false);
     };
     fetchData();
-  }, [params.id]);
+  }, [params?.id]);
 
   const handleOpen = () => {
     setIsOpened(true);
@@ -75,7 +83,14 @@ export default function ViewLetter({ params }) {
   };
 
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-pink-500 animate-pulse font-bold">Retrieving Love Letter...</div>;
-  if (!data) return <div className="min-h-screen bg-black flex items-center justify-center text-gray-500 font-bold">Letter not found.</div>;
+  
+  // Robust check for missing data
+  if (!data) return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-gray-500 font-bold p-4 text-center">
+        <p className="mb-4">Letter not found.</p>
+        <p className="text-xs font-mono text-gray-700">ID: {params?.id || "Unknown"}</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
@@ -106,7 +121,10 @@ export default function ViewLetter({ params }) {
                 <img src={data.media_url} alt="Memory" className="w-full h-full object-cover" />
               )}
             </div>
-          ) : <div className="h-20 bg-linear-to-b from-red-900 to-transparent"></div>}
+          ) : (
+             // UPDATED: Tailwind v4 syntax (bg-linear-to-b)
+             <div className="h-20 bg-linear-to-b from-red-900 to-transparent"></div>
+          )}
 
           <div className="p-8 md:p-12 relative pb-24">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Music, ArrowLeft, Heart, Check, Copy, Loader2, Sparkles } from 'lucide-react';
+// ADDED: 'Link as LinkIcon' for the new visual link box
+import { Upload, Music, ArrowLeft, Heart, Check, Copy, Loader2, Sparkles, Link as LinkIcon } from 'lucide-react';
 
 // Floating Heart Component for Background
 const FloatingHeart = ({ delay, duration, left }) => (
@@ -22,6 +23,9 @@ export default function CreateValentine() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
+  // NEW: State for the "Copied!" button feedback
+  const [copied, setCopied] = useState(false);
+  
   const [formData, setFormData] = useState({ 
     sender: '', receiver: '', message: '', file: null, music: null 
   });
@@ -77,6 +81,13 @@ export default function CreateValentine() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // NEW: Handle Copy Button Logic
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
   };
 
   // Smooth Slide Animation
@@ -208,7 +219,7 @@ export default function CreateValentine() {
               </motion.div>
             )}
 
-            {/* STEP 4: SUCCESS */}
+            {/* STEP 4: SUCCESS - UPDATED with Short Link & Copy Button */}
             {step === 4 && (
               <motion.div key="step4" variants={slideVariants} initial="hidden" animate="visible" className="flex-1 flex flex-col items-center justify-center text-center">
                 <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-100">
@@ -217,12 +228,30 @@ export default function CreateValentine() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">It&apos;s Ready! 🎉</h2>
                 <p className="text-gray-500 mb-8 max-w-xs mx-auto">Your digital love letter has been sealed.</p>
                 
-                <div className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl flex items-center justify-between mb-4 shadow-inner">
-                  <p className="text-xs text-gray-600 truncate flex-1 font-mono">{generatedLink}</p>
-                  <button onClick={() => { navigator.clipboard.writeText(generatedLink); alert('Copied!'); }} className="ml-2 p-2 hover:bg-white rounded-lg transition"><Copy size={16} /></button>
+                {/* Visual Link Box (Shortened Visually) */}
+                <div className="w-full bg-white border-2 border-pink-100 p-2 rounded-xl flex items-center gap-2 mb-4 shadow-sm relative overflow-hidden">
+                  <div className="bg-pink-50 p-3 rounded-lg text-pink-500">
+                    <LinkIcon size={20} />
+                  </div>
+                  {/* We visually truncate the link with CSS */}
+                  <p className="text-sm text-gray-600 font-mono truncate flex-1 text-left">
+                    {generatedLink}
+                  </p>
                 </div>
 
-                <a href={`https://wa.me/?text=I+made+something+special+for+you...+Open+it+here:+${generatedLink}`} target="_blank" className="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-600 transition flex items-center justify-center gap-2">
+                {/* Big Copy Button */}
+                <button 
+                  onClick={handleCopy} 
+                  className={`w-full py-4 rounded-xl font-bold transition flex items-center justify-center gap-2 mb-4 border-2 ${copied ? 'bg-green-500 border-green-500 text-white' : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'}`}
+                >
+                  {copied ? (
+                    <> <Check size={20} /> Copied! </>
+                  ) : (
+                    <> <Copy size={20} /> Copy Link </>
+                  )}
+                </button>
+
+                <a href={`https://wa.me/?text=I+made+something+special+for+you...+Open+it+here:+${encodeURIComponent(generatedLink)}`} target="_blank" className="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-600 transition flex items-center justify-center gap-2">
                    Share on WhatsApp 💬
                 </a>
                 <button onClick={() => window.location.reload()} className="mt-6 text-sm text-gray-400 hover:text-red-500 transition underline">Create Another</button>
