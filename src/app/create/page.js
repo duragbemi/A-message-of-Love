@@ -23,7 +23,6 @@ export default function CreateValentine() {
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
   
-  // ADDED: sender_gender and receiver_gender
   const [formData, setFormData] = useState({ 
     sender: '', sender_gender: 'male',
     receiver: '', receiver_gender: 'female',
@@ -63,9 +62,9 @@ export default function CreateValentine() {
 
       const { data, error } = await supabase.from('capsules').insert([{ 
         sender_name: formData.sender,
-        sender_gender: formData.sender_gender, // Saving Gender
+        sender_gender: formData.sender_gender,
         receiver_name: formData.receiver,
-        receiver_gender: formData.receiver_gender, // Saving Gender
+        receiver_gender: formData.receiver_gender,
         message_text: formData.message,
         media_url: mediaUrl,
         music_url: musicUrl
@@ -127,42 +126,50 @@ export default function CreateValentine() {
                   {/* SENDER INPUT */}
                   <div>
                     <label className="text-xs font-bold text-red-400 uppercase tracking-widest ml-1 mb-1 block">From</label>
-                    <div className="flex bg-white rounded-xl border-2 border-pink-100 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100 transition shadow-sm overflow-hidden">
+                    <div className="flex bg-white rounded-xl border-2 border-pink-100 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100 transition shadow-sm overflow-hidden items-center">
                         <input 
                             onChange={e => setFormData({...formData, sender: e.target.value})} 
                             value={formData.sender} 
-                            className="flex-1 p-4 bg-transparent outline-none font-bold text-gray-900 placeholder-black-400 text-lg" 
+                            className="flex-1 p-4 bg-transparent outline-none font-bold text-gray-900 placeholder-black-400 text-lg w-full min-w-0" 
                             placeholder="Your Name" 
                         />
-                        <select 
-                            value={formData.sender_gender}
-                            onChange={e => setFormData({...formData, sender_gender: e.target.value})}
-                            className="bg-pink-50 text-sm font-bold text-gray-700 p-2 outline-none border-l border-pink-100 cursor-pointer hover:bg-pink-100 transition"
-                        >
-                            <option value="male">👨 Male</option>
-                            <option value="female">👩 Female</option>
-                        </select>
+                        {/* Fixed Dropdown Styling */}
+                        <div className="relative border-l border-pink-100">
+                          <select 
+                              value={formData.sender_gender}
+                              onChange={e => setFormData({...formData, sender_gender: e.target.value})}
+                              className="appearance-none bg-pink-50 text-sm font-bold text-gray-700 py-4 pl-4 pr-10 outline-none cursor-pointer hover:bg-pink-100 transition h-full"
+                          >
+                              <option value="male">👨 Male</option>
+                              <option value="female">👩 Female</option>
+                          </select>
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                        </div>
                     </div>
                   </div>
 
                   {/* RECEIVER INPUT */}
                   <div>
                     <label className="text-xs font-bold text-red-400 uppercase tracking-widest ml-1 mb-1 block">To</label>
-                    <div className="flex bg-white rounded-xl border-2 border-pink-100 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100 transition shadow-sm overflow-hidden">
+                    <div className="flex bg-white rounded-xl border-2 border-pink-100 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100 transition shadow-sm overflow-hidden items-center">
                         <input 
                             onChange={e => setFormData({...formData, receiver: e.target.value})} 
                             value={formData.receiver} 
-                            className="flex-1 p-4 bg-transparent outline-none font-bold text-gray-900 placeholder-black-400 text-lg" 
+                            className="flex-1 p-4 bg-transparent outline-none font-bold text-gray-900 placeholder-black-400 text-lg w-full min-w-0" 
                             placeholder="Your Lover's Name" 
                         />
-                        <select 
-                            value={formData.receiver_gender}
-                            onChange={e => setFormData({...formData, receiver_gender: e.target.value})}
-                            className="bg-pink-50 text-sm font-bold text-gray-700 p-2 outline-none border-l border-pink-100 cursor-pointer hover:bg-pink-100 transition"
-                        >
-                            <option value="female">👩 Female</option>
-                            <option value="male">👨 Male</option>
-                        </select>
+                         {/* Fixed Dropdown Styling */}
+                         <div className="relative border-l border-pink-100">
+                            <select 
+                                value={formData.receiver_gender}
+                                onChange={e => setFormData({...formData, receiver_gender: e.target.value})}
+                                className="appearance-none bg-pink-50 text-sm font-bold text-gray-700 py-4 pl-4 pr-10 outline-none cursor-pointer hover:bg-pink-100 transition h-full"
+                            >
+                                <option value="female">👩 Female</option>
+                                <option value="male">👨 Male</option>
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                        </div>
                     </div>
                   </div>
                 </div>
