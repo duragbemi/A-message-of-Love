@@ -2,14 +2,12 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-// NEW: Import useParams to fix the "Letter not found" error on mobile/production
 import { useParams } from 'next/navigation'; 
 import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import { Volume2, Heart } from 'lucide-react';
 
 export default function ViewLetter() {
-  // NEW: Get ID safely using the hook
   const params = useParams(); 
   
   const [data, setData] = useState(null);
@@ -20,11 +18,9 @@ export default function ViewLetter() {
   const audioRef = useRef(null);
 
   useEffect(() => {
-    // Wait for params to be ready
     if (!params?.id) return;
 
     const fetchData = async () => {
-      // Fetch the letter using the ID from the hook
       const { data: capsule, error } = await supabase.from('capsules').select('*').eq('id', params.id).single();
       if (error) console.error("Error fetching:", error);
       setData(capsule);
@@ -35,7 +31,6 @@ export default function ViewLetter() {
 
   const handleOpen = () => {
     setIsOpened(true);
-    // Initial confetti pop
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff0000', '#ffccd5'] });
     if (audioRef.current) {
       audioRef.current.play().catch(e => console.log("Audio play blocked", e));
@@ -70,21 +65,13 @@ export default function ViewLetter() {
     }, 2000);
   };
 
-  // Text for the "No" button
   const getNoText = () => {
-    const phrases = [
-      "No", "Are you sure?", "Really sure?", "Think again!", "Last chance!", 
-      "Surely not?", "You might regret this!", "Give it a thought!", 
-      "Are you absolutely certain?", "This could be a mistake!", "Have a heart!", 
-      "Don't be so cold!", "Change of heart?", "Wouldn't you reconsider?", 
-      "Is that your final answer?", "You're breaking my heart ;("
-    ];
+    const phrases = ["No", "Are you sure?", "Really sure?", "Think again!", "Last chance!", "Surely not?", "You might regret this!", "Give it a thought!", "Are you absolutely certain?", "This could be a mistake!", "Have a heart!", "Don't be so cold!", "Change of heart?", "Wouldn't you reconsider?", "Is that your final answer?", "You're breaking my heart ;("];
     return phrases[Math.min(noCount, phrases.length - 1)];
   };
 
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-pink-500 animate-pulse font-bold">Retrieving Love Letter...</div>;
   
-  // Robust check for missing data
   if (!data) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-gray-500 font-bold p-4 text-center">
         <p className="mb-4">Letter not found.</p>
@@ -93,8 +80,8 @@ export default function ViewLetter() {
   );
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-y-auto">
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 fixed"></div>
       
       {/* Hidden Audio Player */}
       {data.music_url && <audio ref={audioRef} src={data.music_url} loop />}
@@ -109,70 +96,91 @@ export default function ViewLetter() {
           <p className="text-gray-400 font-light text-sm tracking-widest uppercase">Tap to Open</p>
         </motion.div>
       ) : (
-        <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }} className="z-10 w-full max-w-lg bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl my-8">
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }} 
+          animate={{ y: 0, opacity: 1 }} 
+          transition={{ duration: 0.8 }} 
+          className="z-10 w-full max-w-lg flex flex-col gap-0 shadow-2xl my-8"
+        >
           
-          {/* Media Section */}
-          {data.media_url ? (
-            <div className="w-full max-h-96 bg-black flex items-center justify-center">
-              {data.media_url.match(/\.(mp4|webm)$/i) ? (
-                <video src={data.media_url} controls autoPlay className="w-full h-full object-contain" />
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={data.media_url} alt="Memory" className="w-full h-full object-cover" />
-              )}
-            </div>
-          ) : (
-             // UPDATED: Tailwind v4 syntax (bg-linear-to-b)
-             <div className="h-20 bg-linear-to-b from-red-900 to-transparent"></div>
-          )}
-
-          <div className="p-8 md:p-12 relative pb-24">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
-              <Heart className="text-white fill-white w-8 h-8" />
-            </div>
-
-            <h2 className="text-3xl font-serif text-white mb-6 mt-4">Dearest {data.receiver_name},</h2>
-            <p className="text-gray-200 text-lg leading-loose font-light whitespace-pre-wrap font-sans">{data.message_text}</p>
+          {/* --- TOP COMPARTMENT: MEDIA --- */}
+          <div className="w-full bg-black/50 backdrop-blur-sm rounded-t-3xl overflow-hidden border border-white/10 relative">
+            {data.media_url ? (
+               <div className="w-full relative">
+                 {data.media_url.match(/\.(mp4|webm)$/i) ? (
+                   // Video: No fixed height, lets it scale naturally
+                   <video src={data.media_url} controls autoPlay className="w-full h-auto max-h-[60vh] object-contain mx-auto" />
+                 ) : (
+                   /* eslint-disable-next-line @next/next/no-img-element */
+                   <img src={data.media_url} alt="Memory" className="w-full h-auto max-h-[60vh] object-contain mx-auto" />
+                 )}
+               </div>
+            ) : (
+               <div className="h-32 bg-linear-to-b from-red-900 to-black/80 flex items-center justify-center">
+                 <Heart className="text-white/20 w-12 h-12" />
+               </div>
+            )}
             
-            <div className="mt-8 pt-8 border-t border-white/10 text-center">
-              <p className="text-sm text-gray-400 font-serif italic mb-2">Forever yours,</p>
-              <p className="text-2xl text-red-400 font-bold font-serif">{data.sender_name}</p>
+            {/* Music Indicator (Inside Media Box) */}
+            {data.music_url && (
+              <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded-full flex items-center gap-2 text-[10px] text-white/80 backdrop-blur-md border border-white/10">
+                <Volume2 size={10} className="animate-pulse" /> <span>PLAYING</span>
+              </div>
+            )}
+          </div>
+
+          {/* --- BOTTOM COMPARTMENT: MESSAGE --- */}
+          {/* This is a separate block, so it sits strictly BELOW the video */}
+          <div className="bg-white/10 backdrop-blur-xl border-x border-b border-white/10 rounded-b-3xl p-8 md:p-10 relative">
+            
+            {/* Separator Icon */}
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg border-4 border-black">
+              <Heart className="text-white fill-white w-5 h-5" />
+            </div>
+
+            <h2 className="text-2xl font-serif text-white mb-4 mt-2 text-center">Dearest {data.receiver_name},</h2>
+            
+            {/* Message Body */}
+            <div className="bg-black/20 rounded-xl p-6 mb-8">
+                <p className="text-gray-100 text-lg leading-relaxed font-light whitespace-pre-wrap font-sans text-center">
+                    "{data.message_text}"
+                </p>
+            </div>
+            
+            <div className="text-center mb-8">
+              <p className="text-xs text-gray-400 font-serif italic mb-1">With all my love,</p>
+              <p className="text-xl text-red-400 font-bold font-serif">{data.sender_name}</p>
             </div>
 
             {/* THE PROPOSAL SECTION */}
             {!yesPressed ? (
-              <div className="mt-12 text-center space-y-4">
-                 <h3 className="text-xl font-bold text-pink-300 animate-pulse">Will you be my Valentine? 🌹</h3>
-                 <div className="flex flex-wrap justify-center gap-4 items-center">
+              <div className="pt-6 border-t border-white/10 text-center space-y-5">
+                 <h3 className="text-lg font-bold text-pink-200 animate-pulse">Will you be my Valentine? 🌹</h3>
+                 <div className="flex flex-col gap-3 justify-center items-center w-full max-w-xs mx-auto">
                     <button 
                         onClick={handleYes}
-                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-110 transition text-lg"
+                        className="w-full bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform hover:scale-[1.02] transition text-lg"
                     >
                         YES! ❤️
                     </button>
                     
                     <button
                         onClick={handleNo}
-                        className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full text-sm transition"
-                        style={{ fontSize: Math.max(12, 16 - noCount) + 'px' }} // Button gets smaller
+                        className="text-gray-400 hover:text-white text-sm py-2 transition underline decoration-gray-600"
+                        style={{ fontSize: Math.max(10, 14 - noCount) + 'px' }} 
                     >
                         {getNoText()}
                     </button>
                  </div>
               </div>
             ) : (
-                <div className="mt-12 text-center animate-bounce">
+                <div className="pt-6 border-t border-white/10 text-center animate-bounce">
                     <h3 className="text-2xl font-bold text-green-400">YAY! She said YES! 🎉</h3>
-                    <p className="text-gray-400 text-sm mt-2">Opening WhatsApp to notify sender...</p>
+                    <p className="text-gray-400 text-sm mt-2">Opening WhatsApp...</p>
                 </div>
             )}
           </div>
 
-          {data.music_url && (
-            <div className="bg-black/40 p-3 flex items-center justify-center gap-2 text-xs text-gray-400">
-              <Volume2 size={12} /> <span className="uppercase tracking-widest">Now Playing Your Song</span>
-            </div>
-          )}
         </motion.div>
       )}
     </div>
