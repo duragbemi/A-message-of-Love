@@ -5,31 +5,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { getTimezones } from '@/lib/timezones';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Music, ArrowLeft, Check, Copy, Loader2, Sparkles, Link as LinkIcon, ChevronDown } from 'lucide-react';
-import the helper
-
-export default function CreatePage() {
-  const [zones, setZones] = useState([]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      // Call the helper. 
-      // The first time you load this page, it hits the DB.
-      // The second time (or for the next user), it's instant.
-      const timezones = await getTimezones();
-      setZones(timezones);
-    };
-    
-    loadData();
-  }, []);
-
-  return (
-    <select>
-      {zones.map((z) => (
-        <option key={z.name} value={z.name}>{z.name}</option>
-      ))}
-    </select>
-  );
-}
 
 const FloatingHeart = ({ delay, duration, left }) => (
   <motion.div
